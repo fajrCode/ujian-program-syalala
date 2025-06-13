@@ -51,10 +51,15 @@ $mahasiswa = mysqli_query($koneksi, "SELECT m.*, d.nama as nama_dosen FROM mahas
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Mahasiswa</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- jQuery dan DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 </head>
 
 <body class="bg-gray-100 p-6">
-    <div class="max-w-4xl mx-auto">
+    <div class="max-w-5xl mx-auto">
         <div class="mb-4">
             <a class="px-2 py-1 rounded bg-blue-500 text-white" href="index.php">Kembali</a>
         </div>
@@ -82,7 +87,7 @@ $mahasiswa = mysqli_query($koneksi, "SELECT m.*, d.nama as nama_dosen FROM mahas
             </button>
         </form>
 
-        <table class="w-full bg-white rounded shadow-md">
+        <table id="tabelMahasiswa" class="display w-full bg-white rounded shadow-md">
             <thead>
                 <tr class="bg-gray-200">
                     <th class="p-2 text-left">NIM</th>
@@ -94,7 +99,7 @@ $mahasiswa = mysqli_query($koneksi, "SELECT m.*, d.nama as nama_dosen FROM mahas
                 </tr>
             </thead>
             <tbody>
-                <?php while ($m = mysqli_fetch_assoc($mahasiswa)): ?>
+                <?php while ($m = mysqli_fetch_assoc($mahasiswa)) : ?>
                     <tr class="border-t">
                         <td class="p-2"><?= $m['nim'] ?></td>
                         <td class="p-2"><?= $m['nama'] ?></td>
@@ -110,6 +115,26 @@ $mahasiswa = mysqli_query($koneksi, "SELECT m.*, d.nama as nama_dosen FROM mahas
             </tbody>
         </table>
     </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#tabelMahasiswa').DataTable({
+                responsive: true,
+                language: {
+                    search: "Cari:",
+                    lengthMenu: "Tampilkan _MENU_ entri",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
+                    paginate: {
+                        first: "Awal",
+                        last: "Akhir",
+                        next: "Berikutnya",
+                        previous: "Sebelumnya"
+                    },
+                    zeroRecords: "Tidak ditemukan data yang cocok"
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

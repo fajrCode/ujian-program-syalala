@@ -8,7 +8,6 @@ $edit_data = null;
 // Tambah Nilai
 if (isset($_POST['tambah'])) {
     $mahasiswa_id = $_POST['mahasiswa_id'];
-    $dosen_pa_id = $_POST['dosen_pa_id'];
     $hadir = $_POST['hadir'];
     $tugas = $_POST['tugas'];
     $uts = $_POST['uts'];
@@ -26,7 +25,7 @@ if (isset($_POST['tambah'])) {
     elseif ($nilai_akhir >= 45) $nilai_huruf = 'D';
     else $nilai_huruf = 'E';
 
-    mysqli_query($koneksi, "INSERT INTO nilai (mahasiswa_id, dosen_pa_id, absen, tugas, uts, uas, nilai_akhir, nilai_huruf) VALUES ('$mahasiswa_id','$dosen_pa_id','$hadir','$tugas','$uts','$uas','$nilai_akhir','$nilai_huruf')");
+    mysqli_query($koneksi, "INSERT INTO nilai (mahasiswa_id, absen, tugas, uts, uas, nilai_akhir, nilai_huruf) VALUES ('$mahasiswa_id','$hadir','$tugas','$uts','$uas','$nilai_akhir','$nilai_huruf')");
     header('Location: nilai.php');
 }
 
@@ -48,7 +47,6 @@ if (isset($_GET['edit'])) {
 if (isset($_POST['update'])) {
     $id = $_POST['id'];
     $mahasiswa_id = $_POST['mahasiswa_id'];
-    $dosen_pa_id = $_POST['dosen_pa_id'];
     $hadir = $_POST['hadir'];
     $tugas = $_POST['tugas'];
     $uts = $_POST['uts'];
@@ -66,12 +64,11 @@ if (isset($_POST['update'])) {
     elseif ($nilai_akhir >= 45) $nilai_huruf = 'D';
     else $nilai_huruf = 'E';
 
-    mysqli_query($koneksi, "UPDATE nilai SET mahasiswa_id='$mahasiswa_id', dosen_pa_id='$dosen_pa_id', absen='$hadir', tugas='$tugas', uts='$uts', uas='$uas', nilai_akhir='$nilai_akhir', nilai_huruf='$nilai_huruf' WHERE id=$id");
+    mysqli_query($koneksi, "UPDATE nilai SET mahasiswa_id='$mahasiswa_id', absen='$hadir', tugas='$tugas', uts='$uts', uas='$uas', nilai_akhir='$nilai_akhir', nilai_huruf='$nilai_huruf' WHERE id=$id");
     header('Location: nilai.php');
 }
 
 $mahasiswa = mysqli_query($koneksi, "SELECT * FROM mahasiswa");
-$dosen = mysqli_query($koneksi, "SELECT * FROM dosen_pa");
 ?>
 
 <!DOCTYPE html>
@@ -81,6 +78,11 @@ $dosen = mysqli_query($koneksi, "SELECT * FROM dosen_pa");
     <meta charset="UTF-8">
     <title>Nilai Mahasiswa</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- DataTables & jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
     <style>
         @media print {
             body * {
@@ -111,6 +113,7 @@ $dosen = mysqli_query($koneksi, "SELECT * FROM dosen_pa");
         <div class="mb-4">
             <a class="px-2 py-1 rounded bg-blue-500 text-white" href="index.php">Kembali</a>
         </div>
+
         <h2 class="text-xl font-bold mb-4"><?= $edit_data ? 'Edit Nilai Mahasiswa' : 'Input Nilai Mahasiswa' ?></h2>
         <form method="post" class="bg-white p-4 rounded shadow-md">
             <?php if ($edit_data): ?>
@@ -122,15 +125,6 @@ $dosen = mysqli_query($koneksi, "SELECT * FROM dosen_pa");
                 while ($m = mysqli_fetch_assoc($mahasiswa)): ?>
                     <option value="<?= $m['id'] ?>" <?= ($edit_data && $edit_data['mahasiswa_id'] == $m['id']) ? 'selected' : '' ?>>
                         <?= $m['nama'] ?> (<?= $m['nim'] ?>)
-                    </option>
-                <?php endwhile; ?>
-            </select>
-            <select name="dosen_pa_id" class="border p-2 w-full mb-2" required>
-                <option value="">Pilih Dosen PA</option>
-                <?php mysqli_data_seek($dosen, 0);
-                while ($d = mysqli_fetch_assoc($dosen)): ?>
-                    <option value="<?= $d['id'] ?>" <?= ($edit_data && $edit_data['dosen_pa_id'] == $d['id']) ? 'selected' : '' ?>>
-                        <?= $d['nama'] ?>
                     </option>
                 <?php endwhile; ?>
             </select>
@@ -146,12 +140,13 @@ $dosen = mysqli_query($koneksi, "SELECT * FROM dosen_pa");
         <div class="mt-6" id="print-area">
             <h2 class="text-xl text-center font-bold">Penilaian Mata Kuliah Jaringan Syaraf Tiruan</h2>
             <h2 class="text-xl text-center font-bold">Tahun Ajaran 2024/2025</h2>
-            <table class="table-auto w-full bg-white mt-4">
+            <table id="tabel-nilai" class="table-auto w-full bg-white mt-4">
                 <thead>
                     <tr>
                         <th class="border px-2">No</th>
                         <th class="border px-2">NIM</th>
                         <th class="border px-2">Mahasiswa</th>
+                        <th class="border px-2">Dosen PA</th>
                         <th class="border px-2">Absen</th>
                         <th class="border px-2">Tugas</th>
                         <th class="border px-2">UTS</th>
@@ -163,13 +158,17 @@ $dosen = mysqli_query($koneksi, "SELECT * FROM dosen_pa");
                 </thead>
                 <tbody>
                     <?php
-                    $data = mysqli_query($koneksi, "SELECT nilai.*, mahasiswa.nama as mhs, mahasiswa.nim as nim FROM nilai JOIN mahasiswa ON nilai.mahasiswa_id = mahasiswa.id");
+                    $data = mysqli_query($koneksi, "SELECT nilai.*, mahasiswa.nama as mhs, mahasiswa.nim as nim, dosen_pa.nama as dosen_pa_nama 
+                            FROM nilai 
+                            JOIN mahasiswa ON nilai.mahasiswa_id = mahasiswa.id 
+                            LEFT JOIN dosen_pa ON mahasiswa.dosen_pa_id = dosen_pa.id");
                     $no = 1;
                     while ($row = mysqli_fetch_assoc($data)): ?>
                         <tr>
                             <td class="border px-2 text-center"><?= $no++ ?></td>
                             <td class="border px-2"><?= $row['nim'] ?></td>
                             <td class="border px-2"><?= $row['mhs'] ?></td>
+                            <td class="border px-2"><?= $row['dosen_pa_nama'] ?? '-' ?></td>
                             <td class="border px-2 text-center"><?= $row['absen'] ?></td>
                             <td class="border px-2 text-center"><?= $row['tugas'] ?></td>
                             <td class="border px-2 text-center"><?= $row['uts'] ?></td>
@@ -178,7 +177,7 @@ $dosen = mysqli_query($koneksi, "SELECT * FROM dosen_pa");
                             <td class="border px-2 text-center"><?= $row['nilai_huruf'] ?></td>
                             <td class="border px-2 no-print">
                                 <a href="?edit=<?= $row['id'] ?>" class="text-green-500 mr-2">Edit</a>
-                                <a href="?hapus=<?= $row['id'] ?>" onclick="return confirm('Yakin ingin nilai <?= $row['mhs'] ?>?')" class="text-red-500">Hapus</a>
+                                <a href="?hapus=<?= $row['id'] ?>" onclick="return confirm('Yakin ingin menghapus nilai <?= $row['mhs'] ?>?')" class="text-red-500">Hapus</a>
                             </td>
                         </tr>
                     <?php endwhile; ?>
@@ -199,11 +198,34 @@ $dosen = mysqli_query($koneksi, "SELECT * FROM dosen_pa");
     </div>
 
     <script>
+        let table;
+
+        $(document).ready(function() {
+            table = $('#tabel-nilai').DataTable({
+                paging: false,
+                info: false
+            });
+        });
+
         function PrintLaporan() {
             const ttd = document.getElementById("ttd");
+
+            if ($.fn.dataTable.isDataTable('#tabel-nilai')) {
+                table.destroy();
+            }
+
             ttd.classList.remove("hidden");
+
             window.print();
+
             ttd.classList.add("hidden");
+
+            setTimeout(() => {
+                table = $('#tabel-nilai').DataTable({
+                    paging: false,
+                    info: false
+                });
+            }, 1000);
         }
     </script>
 </body>

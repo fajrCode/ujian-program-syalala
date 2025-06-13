@@ -42,6 +42,11 @@ $dosen = mysqli_query($koneksi, "SELECT * FROM dosen_pa");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Dosen PA</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- DataTables CDN -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 </head>
 
 <body class="bg-gray-100 p-6">
@@ -60,7 +65,7 @@ $dosen = mysqli_query($koneksi, "SELECT * FROM dosen_pa");
             </button>
         </form>
 
-        <table class="w-full bg-white rounded shadow-md">
+        <table id="tabelDosen" class="display w-full bg-white rounded shadow-md">
             <thead>
                 <tr class="bg-gray-200">
                     <th class="p-2 text-left">NIDN</th>
@@ -82,6 +87,26 @@ $dosen = mysqli_query($koneksi, "SELECT * FROM dosen_pa");
             </tbody>
         </table>
     </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#tabelDosen').DataTable({
+                responsive: true,
+                language: {
+                    search: "Cari:",
+                    lengthMenu: "Tampilkan _MENU_ entri",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
+                    paginate: {
+                        first: "Awal",
+                        last: "Akhir",
+                        next: "Berikutnya",
+                        previous: "Sebelumnya"
+                    },
+                    zeroRecords: "Tidak ditemukan data"
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
