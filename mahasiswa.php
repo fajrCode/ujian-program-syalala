@@ -1,87 +1,109 @@
 <?php
-// File: mahasiswa.php
 include 'koneksi.php';
 
-// Tambah Mahasiswa
-if (isset($_POST['tambah'])) {
+$edit = false;
+$data_edit = [];
+
+$list_dosen = mysqli_query($koneksi, "SELECT * FROM dosen_pa");
+
+if (isset($_GET['edit'])) {
+    $edit = true;
+    $id_edit = $_GET['edit'];
+    $data_edit = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT * FROM mahasiswa WHERE id = $id_edit"));
+}
+
+if (isset($_POST['simpan'])) {
     $nim = $_POST['nim'];
     $nama = $_POST['nama'];
     $no_wa = $_POST['no_wa'];
     $jk = $_POST['jk'];
     $dosen_pa_id = $_POST['dosen_pa_id'];
-    
-    mysqli_query($koneksi, "INSERT INTO mahasiswa (nim, nama, no_wa, jk, dosen_pa_id) VALUES ('$nim','$nama','$no_wa','$jk','$dosen_pa_id')");
-    header('Location: mahasiswa.php');
+
+    mysqli_query($koneksi, "INSERT INTO mahasiswa (nim, nama, no_wa, jk, dosen_pa_id) VALUES ('$nim', '$nama', '$no_wa', '$jk', '$dosen_pa_id')");
 }
 
-// Hapus Mahasiswa
+if (isset($_POST['update'])) {
+    $id = $_POST['id'];
+    $nim = $_POST['nim'];
+    $nama = $_POST['nama'];
+    $no_wa = $_POST['no_wa'];
+    $jk = $_POST['jk'];
+    $dosen_pa_id = $_POST['dosen_pa_id'];
+
+    mysqli_query($koneksi, "UPDATE mahasiswa SET nim='$nim', nama='$nama', no_wa='$no_wa', jk='$jk', dosen_pa_id='$dosen_pa_id' WHERE id='$id'");
+    header("Location: mahasiswa.php");
+}
+
 if (isset($_GET['hapus'])) {
     $id = $_GET['hapus'];
-    mysqli_query($koneksi, "DELETE FROM mahasiswa WHERE id=$id");
-    header('Location: mahasiswa.php');
+    mysqli_query($koneksi, "DELETE FROM mahasiswa WHERE id = $id");
+    header("Location: mahasiswa.php");
 }
 
-// Ambil data dosen
-$dosen = mysqli_query($koneksi, "SELECT * FROM dosen_pa");
+$mahasiswa = mysqli_query($koneksi, "SELECT m.*, d.nama as nama_dosen FROM mahasiswa m JOIN dosen_pa d ON m.dosen_pa_id = d.id");
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Mahasiswa</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Mahasiswa</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="p-6 bg-gray-100">
+<body class="bg-gray-100 p-6">
     <div class="max-w-4xl mx-auto">
-        <h2 class="text-xl font-bold mb-4">Form Mahasiswa</h2>
-        <form method="post" class="bg-white p-4 rounded shadow-md">
-            <input type="number" name="nim" placeholder="NIM" class="border p-2 w-full mb-2" required>
-            <input type="text" name="nama" placeholder="Nama" class="border p-2 w-full mb-2" required>
-            <input type="text" name="no_wa" placeholder="No. WA" class="border p-2 w-full mb-2" required>
-            <select name="jk" class="border p-2 w-full mb-2">
-                <option value="Laki-laki">Laki-laki</option>
-                <option value="Perempuan">Perempuan</option>
+    <button class="p-2 rounded bg-blue-500 text-white" onclick="history.back()">Kembali</button>
+        <h1 class="text-2xl font-bold mb-4">Data Mahasiswa</h1>
+
+        <form method="post" class="bg-white p-4 rounded shadow-md mb-6">
+            <input type="hidden" name="id" value="<?= $edit ? $data_edit['id'] : '' ?>">
+            <input type="number" name="nim" placeholder="NIM" class="border p-2 w-full mb-2" value="<?= $edit ? $data_edit['nim'] : '' ?>" required>
+            <input type="text" name="nama" placeholder="Nama" class="border p-2 w-full mb-2" value="<?= $edit ? $data_edit['nama'] : '' ?>" required>
+            <input type="text" name="no_wa" placeholder="No WhatsApp" class="border p-2 w-full mb-2" value="<?= $edit ? $data_edit['no_wa'] : '' ?>" required>
+            <select name="jk" class="border p-2 w-full mb-2" required>
+                <option value="">Pilih Jenis Kelamin</option>
+                <option value="Laki-laki" <?= $edit && $data_edit['jk'] == 'Laki-laki' ? 'selected' : '' ?>>Laki-laki</option>
+                <option value="Perempuan" <?= $edit && $data_edit['jk'] == 'Perempuan' ? 'selected' : '' ?>>Perempuan</option>
             </select>
             <select name="dosen_pa_id" class="border p-2 w-full mb-2" required>
                 <option value="">Pilih Dosen PA</option>
-                <?php while($row = mysqli_fetch_assoc($dosen)): ?>
-                <option value="<?= $row['id'] ?>"><?= $row['nama'] ?></option>
+                <?php mysqli_data_seek($list_dosen, 0); while ($dosen = mysqli_fetch_assoc($list_dosen)) : ?>
+                    <option value="<?= $dosen['id'] ?>" <?= $edit && $data_edit['dosen_pa_id'] == $dosen['id'] ? 'selected' : '' ?>><?= $dosen['nama'] ?></option>
                 <?php endwhile; ?>
             </select>
-            <button type="submit" name="tambah" class="bg-blue-500 text-white px-4 py-2 rounded">Simpan</button>
+            <button type="submit" name="<?= $edit ? 'update' : 'simpan' ?>" class="bg-<?= $edit ? 'yellow' : 'blue' ?>-500 text-white px-4 py-2 rounded">
+                <?= $edit ? 'Update' : 'Simpan' ?>
+            </button>
         </form>
 
-        <h2 class="text-xl font-bold mt-6">Data Mahasiswa</h2>
-        <table class="table-auto w-full bg-white mt-2">
+        <table class="w-full bg-white rounded shadow-md">
             <thead>
-                <tr>
-                    <th class="border px-2">NIM</th>
-                    <th class="border px-2">Nama</th>
-                    <th class="border px-2">WA</th>
-                    <th class="border px-2">JK</th>
-                    <th class="border px-2">Dosen PA</th>
-                    <th class="border px-2">Aksi</th>
+                <tr class="bg-gray-200">
+                    <th class="p-2 text-left">NIM</th>
+                    <th class="p-2 text-left">Nama</th>
+                    <th class="p-2 text-left">No WA</th>
+                    <th class="p-2 text-left">JK</th>
+                    <th class="p-2 text-left">Dosen PA</th>
+                    <th class="p-2">Aksi</th>
                 </tr>
             </thead>
             <tbody>
-                <?php 
-                $data = mysqli_query($koneksi, "SELECT mahasiswa.*, dosen_pa.nama AS dosen_nama FROM mahasiswa JOIN dosen_pa ON mahasiswa.dosen_pa_id = dosen_pa.id");
-                while ($row = mysqli_fetch_assoc($data)): ?>
-                    <tr>
-                        <td class="border px-2"><?= $row['nim'] ?></td>
-                        <td class="border px-2"><?= $row['nama'] ?></td>
-                        <td class="border px-2"><?= $row['no_wa'] ?></td>
-                        <td class="border px-2"><?= $row['jk'] ?></td>
-                        <td class="border px-2"><?= $row['dosen_nama'] ?></td>
-                        <td class="border px-2">
-                            <a href="?hapus=<?= $row['id'] ?>" onclick="return confirm('Yakin?')" class="text-red-500">Hapus</a>
-                        </td>
-                    </tr>
+                <?php while($m = mysqli_fetch_assoc($mahasiswa)): ?>
+                <tr class="border-t">
+                    <td class="p-2"><?= $m['nim'] ?></td>
+                    <td class="p-2"><?= $m['nama'] ?></td>
+                    <td class="p-2"><?= $m['no_wa'] ?></td>
+                    <td class="p-2"><?= $m['jk'] ?></td>
+                    <td class="p-2"><?= $m['nama_dosen'] ?></td>
+                    <td class="p-2">
+                        <a href="?edit=<?= $m['id'] ?>" class="text-yellow-500 mr-2">Edit</a>
+                        <a href="?hapus=<?= $m['id'] ?>" class="text-red-500" onclick="return confirm('Yakin?')">Hapus</a>
+                    </td>
+                </tr>
                 <?php endwhile; ?>
             </tbody>
         </table>
-        <a href="index.php" class="text-blue-500 inline-block mt-4">Kembali ke Dashboard</a>
     </div>
 </body>
 </html>

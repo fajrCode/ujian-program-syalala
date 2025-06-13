@@ -41,24 +41,27 @@ $dosen = mysqli_query($koneksi, "SELECT * FROM dosen_pa");
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Nilai Mahasiswa</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="p-6 bg-gray-100">
     <div class="max-w-4xl mx-auto">
+        <button class="p-2 rounded bg-blue-500 text-white" onclick="history.back()">Kembali</button>
         <h2 class="text-xl font-bold mb-4">Input Nilai Mahasiswa</h2>
         <form method="post" class="bg-white p-4 rounded shadow-md">
             <select name="mahasiswa_id" class="border p-2 w-full mb-2" required>
                 <option value="">Pilih Mahasiswa</option>
-                <?php while($m = mysqli_fetch_assoc($mahasiswa)): ?>
+                <?php while ($m = mysqli_fetch_assoc($mahasiswa)): ?>
                     <option value="<?= $m['id'] ?>"><?= $m['nama'] ?> (<?= $m['nim'] ?>)</option>
                 <?php endwhile; ?>
             </select>
             <select name="dosen_pa_id" class="border p-2 w-full mb-2" required>
                 <option value="">Pilih Dosen PA</option>
-                <?php while($d = mysqli_fetch_assoc($dosen)): ?>
+                <?php while ($d = mysqli_fetch_assoc($dosen)): ?>
                     <option value="<?= $d['id'] ?>"><?= $d['nama'] ?></option>
                 <?php endwhile; ?>
             </select>
@@ -80,12 +83,12 @@ $dosen = mysqli_query($koneksi, "SELECT * FROM dosen_pa");
                 </tr>
             </thead>
             <tbody>
-                <?php 
+                <?php
                 $data = mysqli_query($koneksi, "SELECT nilai.*, mahasiswa.nama as mhs FROM nilai JOIN mahasiswa ON nilai.mahasiswa_id = mahasiswa.id");
                 while ($row = mysqli_fetch_assoc($data)): ?>
                     <tr>
                         <td class="border px-2"><?= $row['mhs'] ?></td>
-                        <td class="border px-2"><?= number_format($row['nilai_akhir'],2) ?></td>
+                        <td class="border px-2"><?= number_format($row['nilai_akhir'], 2) ?></td>
                         <td class="border px-2"><?= $row['nilai_huruf'] ?></td>
                         <td class="border px-2">
                             <a href="?hapus=<?= $row['id'] ?>" onclick="return confirm('Yakin?')" class="text-red-500">Hapus</a>
@@ -97,4 +100,5 @@ $dosen = mysqli_query($koneksi, "SELECT * FROM dosen_pa");
         <a href="index.php" class="text-blue-500 inline-block mt-4">Kembali ke Dashboard</a>
     </div>
 </body>
+
 </html>
