@@ -45,15 +45,19 @@ $mahasiswa = mysqli_query($koneksi, "SELECT m.*, d.nama as nama_dosen FROM mahas
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Mahasiswa</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-gray-100 p-6">
     <div class="max-w-4xl mx-auto">
-    <button class="p-2 rounded bg-blue-500 text-white" onclick="history.back()">Kembali</button>
+        <div class="mb-4">
+            <a class="px-2 py-1 rounded bg-blue-500 text-white" href="index.php">Kembali</a>
+        </div>
         <h1 class="text-2xl font-bold mb-4">Data Mahasiswa</h1>
 
         <form method="post" class="bg-white p-4 rounded shadow-md mb-6">
@@ -68,7 +72,8 @@ $mahasiswa = mysqli_query($koneksi, "SELECT m.*, d.nama as nama_dosen FROM mahas
             </select>
             <select name="dosen_pa_id" class="border p-2 w-full mb-2" required>
                 <option value="">Pilih Dosen PA</option>
-                <?php mysqli_data_seek($list_dosen, 0); while ($dosen = mysqli_fetch_assoc($list_dosen)) : ?>
+                <?php mysqli_data_seek($list_dosen, 0);
+                while ($dosen = mysqli_fetch_assoc($list_dosen)) : ?>
                     <option value="<?= $dosen['id'] ?>" <?= $edit && $data_edit['dosen_pa_id'] == $dosen['id'] ? 'selected' : '' ?>><?= $dosen['nama'] ?></option>
                 <?php endwhile; ?>
             </select>
@@ -89,21 +94,22 @@ $mahasiswa = mysqli_query($koneksi, "SELECT m.*, d.nama as nama_dosen FROM mahas
                 </tr>
             </thead>
             <tbody>
-                <?php while($m = mysqli_fetch_assoc($mahasiswa)): ?>
-                <tr class="border-t">
-                    <td class="p-2"><?= $m['nim'] ?></td>
-                    <td class="p-2"><?= $m['nama'] ?></td>
-                    <td class="p-2"><?= $m['no_wa'] ?></td>
-                    <td class="p-2"><?= $m['jk'] ?></td>
-                    <td class="p-2"><?= $m['nama_dosen'] ?></td>
-                    <td class="p-2">
-                        <a href="?edit=<?= $m['id'] ?>" class="text-yellow-500 mr-2">Edit</a>
-                        <a href="?hapus=<?= $m['id'] ?>" class="text-red-500" onclick="return confirm('Yakin?')">Hapus</a>
-                    </td>
-                </tr>
+                <?php while ($m = mysqli_fetch_assoc($mahasiswa)): ?>
+                    <tr class="border-t">
+                        <td class="p-2"><?= $m['nim'] ?></td>
+                        <td class="p-2"><?= $m['nama'] ?></td>
+                        <td class="p-2"><?= $m['no_wa'] ?></td>
+                        <td class="p-2"><?= $m['jk'] ?></td>
+                        <td class="p-2"><?= $m['nama_dosen'] ?></td>
+                        <td class="p-2">
+                            <a href="?edit=<?= $m['id'] ?>" class="text-yellow-500 mr-2">Edit</a>
+                            <a href="?hapus=<?= $m['id'] ?>" class="text-red-500" onclick="return confirm('Yakin?')">Hapus</a>
+                        </td>
+                    </tr>
                 <?php endwhile; ?>
             </tbody>
         </table>
     </div>
 </body>
+
 </html>

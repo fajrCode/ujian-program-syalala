@@ -13,9 +13,6 @@
             <a href="dosen_pa.php" class="bg-white shadow-md rounded-lg p-4 hover:bg-gray-200">Kelola Dosen PA</a>
             <a href="nilai.php" class="bg-white shadow-md rounded-lg p-4 hover:bg-gray-200">Input Nilai</a>
         </div>
-        <!-- <div class="mt-6">
-            <a href="cetak_pdf.php" target="_blank" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Cetak Laporan PDF</a>
-        </div> -->
     </div>
 </body>
 </html>
