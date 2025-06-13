@@ -46,6 +46,25 @@ $dosen = mysqli_query($koneksi, "SELECT * FROM dosen_pa");
     <meta charset="UTF-8">
     <title>Nilai Mahasiswa</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #print-area, #print-area * {
+                visibility: visible;
+            }
+            #print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
 </head>
 
 <body class="p-6 bg-gray-100">
@@ -72,31 +91,38 @@ $dosen = mysqli_query($koneksi, "SELECT * FROM dosen_pa");
             <button type="submit" name="tambah" class="bg-blue-500 text-white px-4 py-2 rounded">Simpan</button>
         </form>
 
-        <h2 class="text-xl font-bold mt-6">Data Nilai</h2>
-        <table class="table-auto w-full bg-white mt-2">
-            <thead>
-                <tr>
-                    <th class="border px-2">Mahasiswa</th>
-                    <th class="border px-2">Nilai Akhir</th>
-                    <th class="border px-2">Nilai Huruf</th>
-                    <th class="border px-2">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                $data = mysqli_query($koneksi, "SELECT nilai.*, mahasiswa.nama as mhs FROM nilai JOIN mahasiswa ON nilai.mahasiswa_id = mahasiswa.id");
-                while ($row = mysqli_fetch_assoc($data)): ?>
+        <div class="mt-6" id="print-area">
+            <h2 class="text-xl font-bold">Data Nilai</h2>
+            <table class="table-auto w-full bg-white mt-2">
+                <thead>
                     <tr>
-                        <td class="border px-2"><?= $row['mhs'] ?></td>
-                        <td class="border px-2"><?= number_format($row['nilai_akhir'], 2) ?></td>
-                        <td class="border px-2"><?= $row['nilai_huruf'] ?></td>
-                        <td class="border px-2">
-                            <a href="?hapus=<?= $row['id'] ?>" onclick="return confirm('Yakin?')" class="text-red-500">Hapus</a>
-                        </td>
+                        <th class="border px-2">Mahasiswa</th>
+                        <th class="border px-2">Nilai Akhir</th>
+                        <th class="border px-2">Nilai Huruf</th>
+                        <th class="border px-2 no-print">Aksi</th>
                     </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <?php
+                    $data = mysqli_query($koneksi, "SELECT nilai.*, mahasiswa.nama as mhs FROM nilai JOIN mahasiswa ON nilai.mahasiswa_id = mahasiswa.id");
+                    while ($row = mysqli_fetch_assoc($data)): ?>
+                        <tr>
+                            <td class="border px-2"><?= $row['mhs'] ?></td>
+                            <td class="border px-2"><?= number_format($row['nilai_akhir'], 2) ?></td>
+                            <td class="border px-2"><?= $row['nilai_huruf'] ?></td>
+                            <td class="border px-2 no-print">
+                                <a href="?hapus=<?= $row['id'] ?>" onclick="return confirm('Yakin?')" class="text-red-500">Hapus</a>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="no-print mt-4">
+            <button onclick="window.print()" class="bg-green-500 text-white px-4 py-2 rounded">Cetak Tabel Nilai</button>
+        </div>
+
         <a href="index.php" class="text-blue-500 inline-block mt-4">Kembali ke Dashboard</a>
     </div>
 </body>

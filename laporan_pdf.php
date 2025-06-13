@@ -1,38 +1,59 @@
 <?php
 // File: laporan_pdf.php
-require('fpdf/fpdf.php');
 include 'koneksi.php';
 
-$pdf = new FPDF('L','mm','A4');
-$pdf->AddPage();
-$pdf->SetFont('Arial','B',14);
-$pdf->Cell(0,10,'Laporan Nilai Mahasiswa',0,1,'C');
-$pdf->Ln(5);
-
-$pdf->SetFont('Arial','B',10);
-$pdf->Cell(40,10,'Nama',1);
-$pdf->Cell(30,10,'NIM',1);
-$pdf->Cell(20,10,'Absen',1);
-$pdf->Cell(20,10,'Tugas',1);
-$pdf->Cell(20,10,'UTS',1);
-$pdf->Cell(20,10,'UAS',1);
-$pdf->Cell(30,10,'Nilai Akhir',1);
-$pdf->Cell(30,10,'Nilai Huruf',1);
-$pdf->Ln();
-
 $data = mysqli_query($koneksi, "SELECT m.nama, m.nim, n.absen, n.tugas, n.uts, n.uas, n.nilai_akhir, n.nilai_huruf FROM nilai n JOIN mahasiswa m ON n.mahasiswa_id = m.id");
-$pdf->SetFont('Arial','',10);
-
-while ($row = mysqli_fetch_assoc($data)) {
-    $pdf->Cell(40,10,$row['nama'],1);
-    $pdf->Cell(30,10,$row['nim'],1);
-    $pdf->Cell(20,10,$row['absen'],1);
-    $pdf->Cell(20,10,$row['tugas'],1);
-    $pdf->Cell(20,10,$row['uts'],1);
-    $pdf->Cell(20,10,$row['uas'],1);
-    $pdf->Cell(30,10,number_format($row['nilai_akhir'],2),1);
-    $pdf->Cell(30,10,$row['nilai_huruf'],1);
-    $pdf->Ln();
-}
-
-$pdf->Output();
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cetak Laporan Nilai</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-white p-8">
+    <div class="text-center mb-6">
+        <h1 class="text-2xl font-bold">Laporan Nilai Mahasiswa</h1>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="min-w-full border border-gray-300">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="border px-4 py-2">Nama</th>
+                    <th class="border px-4 py-2">NIM</th>
+                    <th class="border px-4 py-2">Absen</th>
+                    <th class="border px-4 py-2">Tugas</th>
+                    <th class="border px-4 py-2">UTS</th>
+                    <th class="border px-4 py-2">UAS</th>
+                    <th class="border px-4 py-2">Nilai Akhir</th>
+                    <th class="border px-4 py-2">Nilai Huruf</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php while ($row = mysqli_fetch_assoc($data)) : ?>
+                <tr class="text-sm">
+                    <td class="border px-4 py-2"><?= $row['nama'] ?></td>
+                    <td class="border px-4 py-2"><?= $row['nim'] ?></td>
+                    <td class="border px-4 py-2"><?= $row['absen'] ?></td>
+                    <td class="border px-4 py-2"><?= $row['tugas'] ?></td>
+                    <td class="border px-4 py-2"><?= $row['uts'] ?></td>
+                    <td class="border px-4 py-2"><?= $row['uas'] ?></td>
+                    <td class="border px-4 py-2"><?= number_format($row['nilai_akhir'],2) ?></td>
+                    <td class="border px-4 py-2"><?= $row['nilai_huruf'] ?></td>
+                </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-6 text-center no-print">
+        <button onclick="window.print()" class="bg-blue-500 text-white px-4 py-2 rounded">Cetak</button>
+    </div>
+</body>
+</html>
